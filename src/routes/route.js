@@ -12,9 +12,13 @@ router.get('/test-me', function (req, res) {
     helperModule.printCurrentMonth()
     helperModule.printBatchInformation()
     formatterModule.trimString()
+    res. send("who are you tell me your name")
+})
+
+    router.get('/sushma', function (req, res) {  
     formatterModule.changeCaseToUpper()
     formatterModule.changeCaseToLower()
-    res.send('My first ever api!')
+    res.send('My first !')
 });
 
 router.get('/hello', function (req, res) {

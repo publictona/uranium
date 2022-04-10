@@ -7,7 +7,7 @@ let changetoLowerCase = function() {
 }
 
 let changeToUpperCase = function() {
-    console.log('The result after using toUpperCase function is ', 'uraNium'.toUpperCase())    
+    console.log('The result after using toUpperCase function is ', 'sushma'.toUpperCase())    
 }
 
 module.exports.trimString = trim

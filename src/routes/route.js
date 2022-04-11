@@ -1,9 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const loggerModule = require('../logger/logger')
 const helperModule = require('../util/helper')
 const formatterModule = require('../validator/formatter')
 const lodash = require('lodash')
 const playersModule = require('../players/players')
+
 
 
 router.get('/test-me', function (req, res) {

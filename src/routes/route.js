@@ -5,7 +5,7 @@ const helperModule = require('../util/helper')
 const formatterModule = require('../validator/formatter')
 const lodash = require('lodash')
 const bookController = require("../controllers/bookController")
-// const bookModel = require("../models/bookModel") 
+const bookCollection = require("../controllers/bookCollection") 
 
 
 
@@ -23,7 +23,7 @@ router.get('/test-me', function (req, res) {
 router.post('/add-player', function(req,res){
 playersModule.players()
 res.send(players)
-}
+});
 
 
 router.get('/hellow', function (req, res) {
@@ -66,6 +66,19 @@ router.get('/book', function (req, res) {
 
 router.post('/createBook',bookController.createBook);
 router.get('/getAllBook', bookController.getBooksData);
+   
+
+router.get('/bookCollection', function (req, res) {
+  res.send('This is my Book collection!!')
+});
+
+router.post('/createBook',bookCollection.createBook);
+router.post('/bookList', bookCollection.bookList);
+router.post('/getBooksInYear', bookCollection.getBooksInYear);
+router.get('/getParticularBooks', bookCollection.getParticularBooks);
+router.get('/getXINRBooks', bookCollection.getXINRBooks);
+router.get('/getRandomBooks', bookCollection.getRandomBooks);
+   
    
 
  module.exports = router;

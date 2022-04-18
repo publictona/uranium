@@ -1,88 +1,90 @@
 const bookModel = require("../models/bookModel")
+const authorModel = require("../models/authorModel")
+const publisherModel = require("../models/publisherModel")
 
-
-const createBook = async function(req,res) {
-    let data = req.body
-    let savedData = await bookModel.create(data)
+const createAuthor = async (req, res) => {
+    let data= req.body
+    let savedData= await authorModel.create(data)
     res.send({msg: savedData})
 }
 
-const getBooksData = async function (req, res) {
-    let allBooks = await bookModel.find()
-    res.send({msg: allBooks})
-}
-
-
-// # mongoDB problem 3
-
-////# 1. CRUD operations. Write API's to do the following:
-// Write create APIs for both books and authors 
-//---> If author_id is not available then do not accept the entry(in neither the author collection
-// nor the books collection)
-
-const createAuthor = async function (req, res) {
+const createPublisher = async (req, res) => {
     let data= req.body
-    let allAuthors = await BookModel.find({author_id : Number})
-    console.log(allAuthors)
-    if(allAuthors.length > 0) req.send({msg:allAuthors,condition:true})
-    else res.send({msg: "No books found" ,condition:false})
+    let savedData= await publisherModel.create(data)
+    res.send({msg: savedData})
 }
 
-const createBs = async function (req, res) {     //(Bs==books)
-    let data= req.body
-    let allBsauthors = await BookModel.find({ bsauthor_id : Number})
-    console.log(allBsauthors)
-    if(allBsauthors.length > 0) req.send({msg:allBsauthors,condition:true})
-    else res.send({msg: "No books found" ,condition:false})
-
-}
-
-//#2  List out the books written by "Chetan Bhagat" ( this will need 2 DB queries one
-// after another- first query will find the author_id for "Chetan Bhagat”. Then next query will get 
-//the list of books with that author_id )
-const getChetanData = async function (req, res) {
-    const data = await  bookModel.find({author_Name : "Chetan Bhagat"})
-    let  bookName  = await bookModel.find({ author_id : Number})
-    res.send({msg:  bookName })
-}
-
-//#3 find the author of “Two states” and update the book price to 100;  Send back the author_name and
-// updated price in response.  ( This will also need 2  queries- 1st will be a findOneAndUpdate. 
-//The second will be a find query aith author_id from previous query)
-const updatePrice = async function (req, res) {
-    const data = await  bookModel.find({bsname :Twostates })
-    let  bsname  = await bookModel.find({bsauthor_id : Number}).select({bsname :Twostates})
-    let priceUpdate    = await bookModel.findOneAndUpdate({ bsname :Twostates},{price :100},{new:true}).select({bsauthor_id : Number})
-    res.send({msg: bsName , priceUpdate })
-}
-
-// *4 Find the books which costs between 50-100(50,100 inclusive) and respond back with the author names of
-// respective books..
-//bookModel.find( { price : { $gte: 50}  ,  price: {$lte: 100} } ) // WRONG
-// bookModel.find( { price : { $gte: 50, $lte: 100} } ).select({ author_id :1})..run a map(or forEach)
-//  loop and get all the authorName corresponding to the authorId’s ( by querying authorModel)
-const costBetween = async function (req, res) {
-    const data = await  bookModel.find({ price : { $gte: 50, $lte: 100} } ).select({ author_id :Number})
-    const id = data.map(x =>x.author_id)
-    let arr =[]
-    for (let i = 0; i<id.length; i++){
-        let K = id[i]
-        const author = await bookModel.find({author_id :K}).select({author_Name : String},{author_id :Number})
-        arr.push(author)
+const createBook = async (req,res) => {
+    let data = req.body
+    if(data.author && data.publisher){
+        let a_check = await authorModel.find({_id: data.author}).select("_id")// find() returns an empty array if nothing is found
+        let p_check = await publisherModel.find({_id: data.publisher}).select("_id").lean()//.lean() is not necessery hence can be removed as well. Check internet for more details about .lean()
+         if(!a_check.length && !p_check.length) //"!a_check.length" is same as "a_check.length === 0"
+            res.send({msg: "Author and Publisher Id fields dosen't match our data, hence invalid"})
+        else if(!a_check.length && p_check.length) 
+            res.send({msg: "Author Id field dosen't match our data, hence invalid"})
+        else if(a_check.length && !p_check.length)
+            res.send({msg: "Publisher Id field dosen't match our data, hence invalid"})
+        else {
+            if(!await bookModel.exists(req.body)){ //.exists() returns null is nothing is found
+                //console.log(!await bookModel.exists(req.body)) to check what is returns if it has value and if it doesn't have value
+                let savedData= await bookModel.create(req.body)
+                res.send({msg: savedData})
+            } else res.send({msg: "This Book already exits in the collection"})
+        }
     }
-    const authorname = arr.flat()
-    res.send({msg : authorname})
+    else if(!data.author && data.publisher) res.send({msg: "You Must input Author ObjectId"})
+    else if(data.author && !data.publisher) res.send({msg: "You must input Publisher ObjectId"})
+    else res.send({msg: "You must input Author and Publisher objectId in Book Data"})
+} 
 
+const findBook = async (req,res) => {
+    // let data = await bookModel.find().populate('author').populate('publisher') //this is correct as well
+    // let data = await bookModel.find().populate(['author','publisher']) //This is more efficient as we can write all fields in an array
+    let data = await bookModel.find().populate([
+                            //{path:'author', select:'authorName'},
+                            {path: 'author', select:{age:0,_id:0, createdAt:0, updatedAt:0, __v:0}},//line 40 doesn't work if we select some keys to not to display
+                            //{path:'publisher', select:'name'},
+                            {path: 'publisher', select:{_id:0, createdAt:0, updatedAt:0, __v:0}}//line 42 doesn't work if we select some keys to not to display
+                            ]).select({_id:0, createdAt:0, updatedAt:0, __v:0})
+                            //The above are some ways to filter populated data 
+    res.send({msg: data})
 }
 
+const updateBook = async (req,res) => {
+    // let find_PId = (await publisherModel.findOne({name: req.body.publisher}).select('_id'))._id.valueOf()
+    // console.log(find_PId) //The above 55 line will return the value of the object string and we can check that in 57 to get the same result
+    let find_PId = await publisherModel.findOne({name: req.body.publisher}).select('_id')
+    let data = await bookModel.updateMany(
+                                        {publisher: find_PId},
+                                        {$set: {isHardCover: true}}
+                                        )
+    res.send({msg: data})
+}
 
+const updateBookPrice = async (req,res) => {
+    let data = await bookModel.updateMany(
+                                        {rating: {$gt: 3.5}},
+                                        {$inc: {price: 10}}
+                                        )
+    res.send({msg: data})
+}
 
-module.exports.createBook = createBook
-module.exports.getBooksData = getBooksData
-//mongodb assign3
-module.exports.createAuthor =createAuthor
-module.exports.createBs = createBs
-module.exports.getChetanData = getChetanData
-module.exports.updatePrice = updatePrice
-module.exports.costBetween = costBetween 
+const updateB = async (req,res) => { //This is good method
+    // let a_filter = (await authorModel.find({rating: {$gt: 3.5}}).select("_id")).map(x => x._id)//This works as well but no need for the extra map and all
+    let a_filter = await authorModel.find({rating: {$gt: 3.5}})
+    await bookModel.updateMany({author: a_filter}, {$inc: {price: 10}})
+    let data = await bookModel.find({author:a_filter})
+    res.send({msg: data})
+}
 
+// const updateB = async (req,res) => { //This is using for loop which is not so better when you can directly do it as above method of line 71
+//     let a_filter = (await authorModel.find({rating: {$gt: 3.5}}).select("_id")).map(x => x._id)
+//     for(let i=0; i< a_filter.length; i++){
+//         await bookModel.updateMany({author: a_filter[i]}, {$inc: {price: 10}})
+//     }
+//     let data = await bookModel.find()
+//     res.send({msg: data})
+// }
+
+module.exports = {createAuthor, createPublisher, createBook, findBook, updateBook, updateBookPrice, updateB}

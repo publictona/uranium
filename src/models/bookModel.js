@@ -1,47 +1,17 @@
 const mongoose = require('mongoose');
-
-// mongodb assignment 1 schema
+const ObjectId = mongoose.Schema.Types.ObjectId
 
 const bookSchema = new mongoose.Schema({
-    bookName : String,
-    authorName : String,
-    category : String,
-    year : Number
-    
-},{timestamps : true});
+    name: {type: String, required:true},
+    author: {type: ObjectId, ref: 'Author1'},
+    price: Number,
+    rating: Number,
+    isHardCover: {type: Boolean, default: false},
+    publisher: {type: ObjectId, ref: 'Publisher1'}
+    }, { timestamps: true });
 
- 
-
-// mongodb assignment 3 schema
-// 1. Write down the schemas for book and authors (keeping the data given below in mind).
-// Also create the documents (corresponding to the data given below) in your database.
+module.exports = mongoose.model('Book1', bookSchema) 
 
 
-const authorsSchema = new mongoose.Schema({
-    author_id : Number,
-    author_Name : String,
-    age : Number,
-    address : String,
-    summary :  mongoose.Schema.Types.Mixed,
-    isDeleted: Boolean ,
-    sales: {type: Number, default: 15},
-}, {timestamps : true});
-
-
-const bsSchema = new mongoose.Schema({
-    bsname : String,
-    bsauthor_id : Number,
-    price : Number,
-    ratings : Number,
-    summary :  mongoose.Schema.Types.Mixed,
-    isDeleted: Boolean,
-    sales: {type: Number, default: 10},
-}, {timestamps : true}); 
-
-
-    
-module.exports = mongoose.model('Book',bookSchema)
-module.exports = mongoose.model('Author',authorsSchema)
-module.exports = mongoose.model('Bs',bsSchema)
 
 

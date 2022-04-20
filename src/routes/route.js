@@ -6,7 +6,7 @@ const developerController = require("../controllers/developerConroller")
 router.post("/batches", developerController.createBatch)
 router.post("/developers", developerController.createDeveloper)
 router.get("/scholarship-developers", developerController.scholarship_developers)
-router.get("/developers", developerController.getDeveloper)
+router.get("/scholarship-developer", developerController.getDeveloper)
 
 //router.post("/ObjectId_Checker", developerController.ObjectIdCheck)
 

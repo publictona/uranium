@@ -13,6 +13,12 @@ mongoose.connect("mongodb+srv://functionup-cohort:G0Loxqc9wFEGyEeJ@cluster0.rzot
 })
 .then( () => console.log("MongoDb is connected"))
 .catch ( err => console.log(err) )
+const today = new Date().toLocaleString()
+app.use((req,res,next) =>{
+    console.log(today + ' , ' +req.path + ' , '+ req.socket.remoteAddress)
+    next();
+})
+
 
 app.use('/', route);
 

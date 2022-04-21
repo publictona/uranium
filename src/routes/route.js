@@ -1,18 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const developerController = require("../controllers/developerController")
-const upoController = require/("../controllers/upoController")
+
+const orderController = require("../controllers/orderController")
+const {headerCheck} = require("../middleware/middleware")
 
 //Developer-Batch route handlers
-router.post("/batches", developerController.createBatch)
-router.post("/developers", developerController.createDeveloper)
-router.get("/scholarship-developers", developerController.scholarship_developers)
-router.get("/scholarship-developer", developerController.getDeveloper)
-
-//User,Product,Order route handlers
-router.post("/createProduct", upoController.createProduct)
-//router.post("/createUser", upoController.createUser)
+router.post("/users", headerCheck, orderController.createUser)
+router.post("/products", orderController.createProduct)
+router.post("/orders", headerCheck, orderController.createOrder)
 
 module.exports = router;
+
+
 
 

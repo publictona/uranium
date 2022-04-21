@@ -55,7 +55,7 @@ const createOrder = async (req, res) => {
 }
 
 
-//module.exports = {createProduct,createUser}
+
 
 module.exports = {createUser, createProduct, createOrder}
 

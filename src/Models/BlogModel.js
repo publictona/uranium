@@ -4,32 +4,32 @@ const blogSchema = mongoose.Schema(
   {
     title: {
       type: String,
-      require: true,
+      required: true,
     },
     body: {
       type: String,
-      require: true,
+      required: true,
     },
     authorId: {
       type: mongoose.Schema.Types.ObjectId,
-      require: true,
+      required: true,
       ref: 'Author',
     },
     tags: {
-      type: Array,
-      require: true,
+      type: [String],
+      required: true,
     },
     category: {
       type: String,
-      require: true,
+      required: true,
       enum: ['technology', 'entertainment', 'lifestyle', 'food', 'fashion'],
     },
     subcategory: {
-      type: Array,
+      type: [String],
     },
     deletedAt: {
       type: Date,
-      require: true,
+      default: null,
     },
     isDeleted: {
       type: Boolean,
@@ -37,15 +37,15 @@ const blogSchema = mongoose.Schema(
     },
     publishedAt: {
       type: Date,
-      require: true,
+      required: true,
     },
     isPublished: {
       type: Boolean,
-      require: true,
-      default: true,
+      required: true,
+      default: false,
     },
   },
-  { timestamp: true },
+  { timestamps: true },
 )
 
-module.exports = mongoose.Schema('blogSchema', blogSchema)
+module.exports = mongoose.Schema('blog', blogSchema)

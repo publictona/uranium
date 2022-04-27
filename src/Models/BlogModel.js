@@ -17,10 +17,10 @@ const blogSchema = new mongoose.Schema(
     },
     tags: {
       type: [String],
-      required: true,
+      // required: true, // this is not mandatory // its printing null null 
     },
     category: {
-      type: String,
+      type: String, 
       required: true,
     },
     subcategory: {

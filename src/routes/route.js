@@ -1,10 +1,18 @@
 const express = require('express')
 const router = express.Router()
-const CowinController = require('../controllers/cowinController')
-const weatherController = require('../controllers/weatherController')
-const memeController = require('../controllers/memeController')
-router.get('/test-me', function (req, res) {
-  res.send('My first ever api!')
-})
+const blogController = require('../Controller/blogController')
+const authorController = require('../Controller/authorController')
+
+router.post('/authors', authorController.createAuthor)
+
+router.post('/blogs', blogController.createBlog)
+
+router.get('/getblogs', blogController.getBlogs)
+
+router.put('/blogs/:blogsId', blogController.updateBlog)
+
+router.put('/deleteblogs/:blogsId', blogController.deleteBlog)
+
+router.put('/delete', blogController.deleteByParams)
 
 module.exports = router

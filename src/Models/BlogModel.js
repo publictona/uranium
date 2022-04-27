@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const blogSchema = mongoose.Schema(
+const blogSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -22,14 +22,13 @@ const blogSchema = mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ['technology', 'entertainment', 'lifestyle', 'food', 'fashion'],
     },
     subcategory: {
       type: [String],
     },
     deletedAt: {
       type: Date,
-      default: null,
+      default: Date,
     },
     isDeleted: {
       type: Boolean,
@@ -37,15 +36,14 @@ const blogSchema = mongoose.Schema(
     },
     publishedAt: {
       type: Date,
-      required: true,
+      default: Date,
     },
     isPublished: {
       type: Boolean,
-      required: true,
       default: false,
     },
   },
   { timestamps: true },
 )
 
-module.exports = mongoose.Schema('blog', blogSchema)
+module.exports = mongoose.model('blog', blogSchema)

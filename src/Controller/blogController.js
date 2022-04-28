@@ -273,4 +273,4 @@ module.exports.createBlog = createBlog
 module.exports.getBlogs = getBlogs
 module.exports.updateBlog = updateBlog
 module.exports.deleteBlog = deleteBlog
-module.exports.deleteByParams = deleteByParams
+module.exports.deleteByParams = deleteByParams 

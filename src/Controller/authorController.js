@@ -1,6 +1,9 @@
 const authorModel = require('../Models/AuthorModel')
 var validator = require('email-validator')
 var passwordValidator = require('password-validator')
+const { send } = require('express/lib/response')
+const jwt = require('jsonwebtoken')
+
 
 const createAuthor = async (req, res) => {
   try {
@@ -61,5 +64,33 @@ const createAuthor = async (req, res) => {
   }
 }
 
-module.exports = { createAuthor }    
+
+const Login = async (req,res)=>{
+  let userName = req.body.email
+  let password = req.body.password
+
+  if(!userName || !password){
+    res.status(400).send({error:"please enter username and Password"})
+  }
+
+  let isUser = await authorModel.findOne({email:userName})
+  console.log(isUser);
+  
+  if(!isUser){
+    res.status(404).send({error:"no user foud with given Email"})
+   }
+   if(isUser.password != password){
+    res.status(401).send({error:"Password not matched"})
+   }
+   console.log({id:isUser._id});
+
+   let token = jwt.sign({userId:isUser._id}, "functionUp-Uranium")
+
+   res.status(200).send({msg:"login Successfull",
+                        Token:token
+        })
+}
+
+module.exports.createAuthor = createAuthor
+module.exports.Login = Login
            

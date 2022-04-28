@@ -1,5 +1,7 @@
 const BlogModel = require('../Models/BlogModel')
 const authorModel = require('../Models/AuthorModel')
+const res = require('express/lib/response')
+const jwt = require('jsonwebtoken')
 
 const createBlog = async function (req, res) {
   try {
@@ -73,22 +75,45 @@ const getBlogs = async (req, res) => {
 
 const updateBlog = async (req, res) => {
   try {
+
+    const isAuthorized = function(token, userId){
+ 
+    
+      let deCodedToken = jwt.verify(token, "functionUp-Uranium")
+      if(deCodedToken.userId!=userId){
+        console.log("Iam decoded Id"+ deCodedToken.userId);
+        return false
+      }
+      return true
+  }
+
     let Data = req.body
     let Id = req.params.blogsId
     let tags = req.body.tags
     let subcategory = req.body.subcategory
-    let user = await BlogModel.findById(Id)
-    let updatedTags = user.tags
+    console.log(Data);
+    let blog = await BlogModel.findById(Id)
+    let updatedTags = blog.tags
     if (tags) {
       updatedTags.push(tags)
     }
     // updatedTags.push(tags)
-    let updatedSubCategory = user.subcategory
+    let updatedSubCategory = blog.subcategory
     if (subcategory) {
       updatedSubCategory.push(subcategory)
     }
     // updatedSubCategory.push(subcategory)
     console.log(Data)
+    let token = req.headers["x-auth-token"]
+    if(!token){
+        token = req.headers["X-Auth-Token"]
+    }
+  
+    let isuserAuthorized = isAuthorized(token,blog.authorId)
+    
+    if(!isuserAuthorized){
+      res.status(404).send({ error: 'you are not authorized' })
+    }
 
     let updatedBlog = await BlogModel.findOneAndUpdate(
       { _id: Id },
@@ -113,8 +138,17 @@ const updateBlog = async (req, res) => {
 
 
 const deleteBlog = async (req, res) => {
+  const isAuthorized = function(token, userId){
+    let deCodedToken = jwt.verify(token, "functionUp-Uranium")
+    if(deCodedToken.userId!=userId){
+     
+      return false
+    }
+    return true
+}
   try {
-    let Id = req.params.blogsId
+    let Id = req.params.blogId
+    console.log(Id);
 
     if (!(Id.match(/^[0-9a-fA-F]{24}$/))) {
       res.status(401).send({error: "authors Id is not valid"})
@@ -126,11 +160,23 @@ const deleteBlog = async (req, res) => {
         .status(401)
         .send({ error: 'Inavlid Id---Invalid Length of Id' })
     }
-    const isAuthor = authorModel.find({ _id: Id })
-    if (!isAuthor) {
+    const isBlog = BlogModel.find({ _id: Id , isDeleted:false})
+    console.log(isBlog+"-------here I am");
+    if (!isBlog) {
       return res
         .status(404)
-        .send({ error: 'Inavlid Id---No Author exist with given Id' })
+        .send({ error: 'Inavlid Id or Already deleted' })
+    }
+
+    let token = req.headers["x-auth-token"]
+    if(!token){
+        token = req.headers["X-Auth-Token"]
+    }
+  
+    let isuserAuthorized = isAuthorized(token,isBlog.authorId)
+    
+    if(!isuserAuthorized){
+      res.status(404).send({ error: 'you are not authorized' })
     }
 
     let deletedDoc = await BlogModel.findOneAndUpdate(
@@ -152,49 +198,67 @@ const deleteBlog = async (req, res) => {
 }
 
 
+
+
+
+
 const deleteByParams = async (req, res) => {
   try {
-    let Data = req.query
-    let authorsId = Data.authorsId 
-    if (!(authorsId.match(/^[0-9a-fA-F]{24}$/))) {
-      res.status(401).send({error: "authors Id is not valid"})
-      // Yes, it's a valid ObjectId, proceed with `findById` call. 
-    }
     
-    if (!Data) {
-      res.status(404).send({ error: 'Inavlid query---No Data in query' })
+      const isAuthorized = function(token, userId){
+        let deCodedToken = jwt.verify(token, "functionUp-Uranium")
+        if(deCodedToken.userId!=userId){
+         
+          return false
+        }
+        return true
     }
-    if (authorsId.length != 24) {
-      return res
-        .status(401)
-        .send({ error: 'Inavlid Id---Invalid Length of Id' })
-    }
-    const isAuthor = await authorModel.findById({authorsId})
-    if (!isAuthor) {
+    let {authorsId, isPublished, tags, category, subcategory}  =req.query
+
+    
+    // const isAuthor = await authorModel.findById(authorsId)
+    if (!req.query) {
       return res
         .status(404)
-        .send({ error: 'Inavlid Id---No Author exist with given Id' })
+        .send({ error: 'Inavlid Input---Query shoud not be emplpty' })
     }
 
-    let deletedDoc = await BlogModel.findOneAndUpdate(
-      {
-        $or: [
-          { authorId: authorsId },
-          { isPublished: Data.isPublished },
-          { tags: Data.tags },
-          { category: Data.category },
-          { subcategory: Data.subcategory },
-        ],
-      },
-      { isDeleted: true, deletedAt: Date() },
-    )
+    let Blog = await BlogModel.find({$or:[  { authorId: authorsId },
+      { isPublished: isPublished },
+      { tags: tags },
+      { category:category },
+      { subcategory:subcategory }]})
+
+      let token = req.headers["x-auth-token"]
+    if(!token){
+        token = req.headers["X-Auth-Token"]
+    }
+    if(!token){
+      res.status(404).send({ error: 'no token in header' })
+    }
+  
+    let isuserAuthorized = isAuthorized(token,Blog.authorId)
+    
+    if(!isuserAuthorized){
+      res.status(404).send({ error: 'you are not authorized' })
+    }
+    let deletedDoc = await BlogModel.findOneAndUpdate({isDeleted:false, $or:[  { authorId: authorsId },
+            { isPublished: isPublished },
+            { tags: tags },
+            { category:category },
+            { subcategory:subcategory }]},
+              { isDeleted: true, deletedAt: Date() } ,  { returnDocument: 'after' })
     console.log(deletedDoc)
     if (!deletedDoc) {
       res
         .status(404)
-        .send({ error: 'Document not found / given data not exists' })
+        .send({ error: 'Document not found / given data not exists/ is Already Deleted' })
       }
       res.status(200).send({ Updates: deletedDoc })
+
+      const withTags = BlogModel.findOneAndUpdate({ tags:{ $contains : tags } },{ isDeleted: true, deletedAt: Date() } ,  { returnDocument: 'after' })
+
+      console.log(withTags);
     } catch (err) {
       console.log(err)
       res.status(500).send({ msg: err.message })
@@ -203,9 +267,10 @@ const deleteByParams = async (req, res) => {
   
 
 
+
+ 
 module.exports.createBlog = createBlog
 module.exports.getBlogs = getBlogs
 module.exports.updateBlog = updateBlog
 module.exports.deleteBlog = deleteBlog
 module.exports.deleteByParams = deleteByParams
-  

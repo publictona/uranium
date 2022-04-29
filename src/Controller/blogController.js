@@ -50,23 +50,23 @@ catch (err) {
 
 const getBlogs = async (req, res) => {
   try {
-    let myAuthor = req.query.authorsId
-    let myCategory = req.query.category
-    if (!myAuthor || !myCategory) {
-      res.status(401).send({error : "authorId and category is not present"})
+    
+    
+    let {authorsId, tags, category, subcategory}  =req.query
+    console.log(req.query);
+    if (!req.query) {
+      res.status(401).send({error : "no query is present"})
     }
 
-    if (!(myAuthor.match(/^[0-9a-fA-F]{24}$/))) {
-      res.status(401).send({error: "authors Id is not valid"})
-      // Yes, it's a valid ObjectId, proceed with `findById` call. 
-    }
-
-    let data = await BlogModel.find({ isPublished: true, isDeleted: false })
-    console.log(data)
-    if (!data) {
+    let Blog = await BlogModel.find({isPublished: true, isDeleted:false ,$or:[  { authorId: authorsId },
+      { tags: tags },
+      { category:category },
+      { subcategory:subcategory }]})
+      console.log(Blog);
+    if (!Blog[0]) {
       res.status(404).send({ err: 'data not found' })
     }
-    res.status(200).send({ msg: data })
+    res.status(200).send({ msg: Blog })
   } catch (err) {
     console.log(err)
     res.status(500).send({ err: 'server not found' })
@@ -236,8 +236,9 @@ const deleteByParams = async (req, res) => {
     if(!token){
       res.status(404).send({ error: 'no token in header' })
     }
+    console.log(Blog[0].authorId +"----Ima uthor Id");
   
-    let isuserAuthorized = isAuthorized(token,Blog.authorId)
+    let isuserAuthorized = isAuthorized(token,Blog[0].authorId)
     
     if(!isuserAuthorized){
       res.status(404).send({ error: 'you are not authorized' })

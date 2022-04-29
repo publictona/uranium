@@ -16,6 +16,6 @@ router.put('/blogs/:blogsId',middleware.authUser, blogController.updateBlog)
 
 router.put('/deleteblogs/:blogsId',middleware.authUser, blogController.deleteBlog)
 
-router.put('/delete',middleware.authUser, blogController.deleteByParams)
+router.put('/delete', blogController.deleteByParams)
 
 module.exports = router

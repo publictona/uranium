@@ -54,6 +54,7 @@ const createBlog = async function (req, res) {
 
 const getBlogs = async (req, res) => {
   try {
+<<<<<<< HEAD
 
     let { authorId, tags, category, subcategory } = req.params
     console.log(req.query);
@@ -72,6 +73,25 @@ const getBlogs = async (req, res) => {
       res.status(404).send({ err: 'data not found' })
     }
     res.status(200).send({ msg: blog })
+=======
+    
+    
+    let {authorsId, tags, category, subcategory}  =req.query
+    console.log(req.query);
+    if (!req.query) {
+      res.status(401).send({error : "no query is present"})
+    }
+
+    let Blog = await BlogModel.find({isPublished: true, isDeleted:false ,$or:[  { authorId: authorsId },
+      { tags: tags },
+      { category:category },
+      { subcategory:subcategory }]})
+      console.log(Blog);
+    if (!Blog[0]) {
+      res.status(404).send({ err: 'data not found' })
+    }
+    res.status(200).send({ msg: Blog })
+>>>>>>> 2f36dccaa97d28af1522bc6f8d70a7180d35abf3
   } catch (err) {
     console.log(err)
     res.status(500).send({ err: 'server not found' })
@@ -166,10 +186,36 @@ const deleteByParams = async (req, res) => {
       isDeleted: false, authorId: decodedToken.userId,$or: [{ authorId: authorsId },
       { isPublished: isPublished },
       { tags: tags },
+<<<<<<< HEAD
       { category: category },
       { subcategory: subcategory }],
     },
       { isDeleted: true, deletedAt: Date()}, { returnDocument: 'after' })
+=======
+      { category:category },
+      { subcategory:subcategory }]})
+
+      let token = req.headers["x-auth-token"]
+    if(!token){
+        token = req.headers["X-Auth-Token"]
+    }
+    if(!token){
+      res.status(404).send({ error: 'no token in header' })
+    }
+    console.log(Blog[0].authorId +"----Ima uthor Id");
+  
+    let isuserAuthorized = isAuthorized(token,Blog[0].authorId)
+    
+    if(!isuserAuthorized){
+      res.status(404).send({ error: 'you are not authorized' })
+    }
+    let deletedDoc = await BlogModel.findOneAndUpdate({isDeleted:false, $or:[  { authorId: authorsId },
+            { isPublished: isPublished },
+            { tags: tags },
+            { category:category },
+            { subcategory:subcategory }]},
+              { isDeleted: true, deletedAt: Date() } ,  { returnDocument: 'after' })
+>>>>>>> 2f36dccaa97d28af1522bc6f8d70a7180d35abf3
     console.log(deletedDoc)
     if (!deletedDoc) {
       res

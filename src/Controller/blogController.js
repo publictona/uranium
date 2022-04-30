@@ -55,7 +55,7 @@ const createBlog = async function (req, res) {
 const getBlogs = async (req, res) => {
   try {
 
-    let { authorId, tags, category, subcategory } = req.params
+    let { authorId, tags, category, subcategory } = req.query
     console.log(req.query);
     if (!req.query) {
       res.status(401).send({ error: "no query is present" })
@@ -68,7 +68,7 @@ const getBlogs = async (req, res) => {
       { subcategory: subcategory }]
     })
     console.log(blog);
-    if (!blog[0]) {
+    if (!blog) {
       res.status(404).send({ err: 'data not found' })
     }
     res.status(200).send({ msg: blog })
@@ -81,7 +81,7 @@ const getBlogs = async (req, res) => {
 
 const updateBlog = async (req, res) => {
   try {
-    // const { id, tags, subcategory} = data  and $addtoset
+  
     let data = req.body
     let Id = req.params.blogsId
     let tags = req.body.tags
@@ -100,11 +100,11 @@ const updateBlog = async (req, res) => {
     console.log(data)
 
     let updatedBlog = await blogModel.findOneAndUpdate(
-      { _id: Id  },
+      { _id: Id  , isDeleted:false},
       {
         title: data.title,
-        tags: updatedTags,  // don't know why null is coming up in response when you only want to update subcategory
-        subcategory: updatedSubCategory, // don't know why null is coming up in response when you update only tags 
+        tags: updatedTags,  
+        subcategory: updatedSubCategory, 
         body: data.body,
         isPublished:data.isPublished
       },
@@ -155,7 +155,6 @@ const deleteByParams = async (req, res) => {
     let { authorsId, isPublished, tags, category, subcategory } = req.query
 
 
-    // const isAuthor = await authorModel.findById(authorsId)
     if (!req.query) {
       return res
         .status(404)
@@ -163,7 +162,7 @@ const deleteByParams = async (req, res) => {
     }
 
     let deletedDoc = await blogModel.updateMany({
-      isDeleted: false, authorId: decodedToken.userId,$or: [{ authorId: authorsId },
+      isDeleted: false, authorId: decodedToken.userId,$or: [
       { isPublished: isPublished },
       { tags: tags },
       { category: category },

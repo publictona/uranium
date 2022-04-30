@@ -1,9 +1,7 @@
-const authorModel = require('../Models/AuthorModel')
+const authorModel = require('../models/authorModel')
+const jwt = require('jsonwebtoken')
 var validator = require('email-validator')
 var passwordValidator = require('password-validator')
-const { send } = require('express/lib/response')
-const jwt = require('jsonwebtoken')
-
 
 const createAuthor = async (req, res) => {
   try {
@@ -28,19 +26,25 @@ const createAuthor = async (req, res) => {
 
 
     if(!myTitle) {
-      res.status(401).send({error: "title should be Mr or Mrs or Miss"})
+      res.status(401).send({error: "title is not present"})
+    }
+    if(!myEmail) {
+      res.status(401).send({error: "Email is not present"})
     }
 
     if(!(myTitle == "Mrs" || myTitle == "Mr" || myTitle == "Miss")) {
-             res.status(401).send({error : "title is not correct "})
+             res.status(401).send({error : "title has to be Mr or Mrs or Miss "})
     }
 
     if(!myPassword) {
       res.status(401).send({error: "password is missing"})
     }
+    
     if (isPasswordValidate === false) {
       res.status(401).send({error : "password isn't validate, please make sure length is minimum 8, should have one uppercase and lowercase character and Number also and donot use space and have a special character"})
     }
+
+  // request me email ara h ki nahi check it out and send error agr email hi nahi h 
 
     console.log(myEmail)
     let isValidEmail = await validator.validate(myEmail)
@@ -65,32 +69,29 @@ const createAuthor = async (req, res) => {
 }
 
 
-const Login = async (req,res)=>{
-  let userName = req.body.email
-  let password = req.body.password
+const loginUser = async function (req,res) {
+  let checkEmail = req.body.email
+  let checkPassword = req.body.password
+  
 
-  if(!userName || !password){
-    res.status(400).send({error:"please enter username and Password"})
+  let user = await authorModel.findOne({ emailId: checkEmail, password: checkPassword });
+ 
+  if(!user) {
+    res.status(404).send({error : "check your email or password"})
   }
 
-  let isUser = await authorModel.findOne({email:userName})
-  console.log(isUser);
-  
-  if(!isUser){
-    res.status(404).send({error:"no user foud with given Email"})
-   }
-   if(isUser.password != password){
-    res.status(401).send({error:"Password not matched"})
-   }
-   console.log({id:isUser._id});
+    let token = jwt.sign(
+      {
+        userId: user._id.toString(),
+        batch: "uranium",
+        organisation: "FUnctionUp",
+      },"functionup-uranium");
+    // console.log(token)
+    res.setHeader("x-auth-token", token);
+    res.send({ status: true, data: token });
+  };
 
-   let token = jwt.sign({userId:isUser._id}, "functionUp-Uranium")
 
-   res.status(200).send({msg:"login Successfull",
-                        Token:token
-        })
-}
-
-module.exports.createAuthor = createAuthor
-module.exports.Login = Login
+module.exports.loginUser = loginUser
+module.exports.createAuthor = createAuthor    
            

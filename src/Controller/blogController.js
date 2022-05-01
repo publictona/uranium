@@ -144,7 +144,7 @@ const deleteBlog = async (req, res) => {
 
 const deleteByParams = async (req, res) => {
   try {
-    let decodedToken = jwt.verify(req.headers["x-auth-token"],"functionup-uranium")
+    let decodedToken = jwt.verify(req.headers["x-api=key" || "X-Api-Key"],"functionup-uranium")
 
     let { authorsId, isPublished, tags, category, subcategory } = req.query
 

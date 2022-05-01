@@ -6,37 +6,33 @@ const jwt   =require("jsonwebtoken")
 const createBlog = async function (req, res) {
   try {
     let data = req.body
-    let checkId = data.authorId
-    let myTitle = data.title
-    let myBody = data.body
-    let myCategory = data.category
+   
+    let { authorId, title, body, category} = req.body
 
-    if (!myTitle) {
-      res.status(401).send({ error: "Title missing" })
+    if (!title) {
+      res.status(401).send({ error: "Title is missing" })
     }
 
-    if (myTitle.length < 2) {
+    if (title.length < 2) {
       res.status(401).send({ error: "length of title must be greater than 2" })
     }
 
-    if (!myBody) {
-      res.status(401).send({ error: "Body missing" })
+    if (!body) {
+      res.status(401).send({ error: "Body is missing" })
     }
 
-    if (myBody.length < 50) {
+    if (body.length < 50) {
       res.status(401).send({ error: "length of body must be greater than 50" })
     }
 
-    if (!myCategory) {
+    if (!category) {
       res.status(401).send({ error: "category is missing" })
     }
-
-    console.log(checkId)
-    if (!checkId) {
+    if (!authorId) {
       return res.status(401).send({ msg: 'please enter authorId' })
     }
 
-    let validId = await authorModel.findById(checkId)
+    let validId = await authorModel.findById(authorId)
     if (!validId) {
       return res.status(401).send({ msg: 'authorId is not correct' })
     }

@@ -3,9 +3,7 @@ const blogModel = require("../models/blogModel")
 
 
 const authentication = async function (req, res, next) {
-    let token = req.headers["x-auth-token"]
-    if (!token) token = req.headers["X-Auth-Token"]
-
+    let token = req.headers["x-api=key" || "X-Api-Key"]
     if (!token) {
         res.status(401).send({ error: "no token found" })
     }
@@ -19,7 +17,7 @@ const authentication = async function (req, res, next) {
 }
 
 const deleteandUpdateBlogById=async(req,res,next)=>{
-    let token = req.headers["x-auth-token"||"X-Auth-Token"]
+    let token = req.headers["x-api=key" || "X-Api-Key"]
     let decodedToken = jwt.verify(token,"functionup-uranium")
     let Id = req.params.blogsId
     if(Id.length!=24){
@@ -39,7 +37,7 @@ const deleteandUpdateBlogById=async(req,res,next)=>{
 
 
 const deleteBlogbyParams= async (req,res,next)=>{
-     let token = req.headers["x-auth-token"]
+     let token = req.headers["x-api=key" || "X-Api-Key"]
      let decodedToken = jwt.verify(token,"functionup-uranium")
      let { authorId, isPublished, tags, category, subcategory } = req.query
      let blog = await blogModel.find({$or:[{authorId:authorId},{isPublished:isPublished},{tags:tags}, {category:category}, {subcategory:subcategory}]})

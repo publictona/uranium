@@ -6,37 +6,33 @@ var passwordValidator = require('password-validator')
 const createAuthor = async (req, res) => {
   try {
     let data = req.body
-    let myEmail = req.body.email
-    let myFname = req.body.fname
-    let myLname = req.body.lname
-    let myTitle = req.body.title
-    let myPassword = req.body.password
+    let {email, fname,lname,title,password} = req.body
     var schema = new passwordValidator ()
     schema.is().min(8).is().max(100).has().uppercase().has().lowercase().has().digits(2).has().not().spaces().is().not().oneOf(["Passw0rd", "Password123", "myPassword@123"])
-    const isPasswordValidate = schema.validate (myPassword)
+    const isPasswordValidate = schema.validate (password)
     console.log(isPasswordValidate)
 
-    if (!myFname) {
+    if (!fname) {
       res.status(401).send({error: "fname is missing"})
     }
 
-    if(!myLname) {
+    if(!lname) {
       res.status(401).send({error: "lname is missing"})
     }
 
 
-    if(!myTitle) {
+    if(!title) {
       res.status(401).send({error: "title is not present"})
     }
-    if(!myEmail) {
+    if(!email) {
       res.status(401).send({error: "Email is not present"})
     }
 
-    if(!(myTitle == "Mrs" || myTitle == "Mr" || myTitle == "Miss")) {
+    if(!(title == "Mrs" || title == "Mr" || title == "Miss")) {
              res.status(401).send({error : "title has to be Mr or Mrs or Miss "})
     }
 
-    if(!myPassword) {
+    if(!password) {
       res.status(401).send({error: "password is missing"})
     }
     
@@ -46,12 +42,12 @@ const createAuthor = async (req, res) => {
 
   // request me email ara h ki nahi check it out and send error agr email hi nahi h 
 
-    console.log(myEmail)
-    let isValidEmail = await validator.validate(myEmail)
+    console.log(email)
+    let isValidEmail = await validator.validate(email)
     if (!isValidEmail){
       res.status(401).send({error: "email is not valid"})
     }
-    let isUniqueEmail = await authorModel.find({email:myEmail })
+    let isUniqueEmail = await authorModel.find({email:email })
     console.log(isUniqueEmail)
     if (isUniqueEmail[0]) {
       res.status(401).send({error : "email already exists/ Not unique"})
@@ -59,7 +55,7 @@ const createAuthor = async (req, res) => {
 
     let savedData = await authorModel.create(data)
     if (!savedData) {
-      res.status(404).send({ msg: 'auther not created' })
+      res.status(401).send({ msg: 'auther not created' })
     }
     res.status(200).send({ msg: savedData })
   } catch (err) {
@@ -74,7 +70,7 @@ const loginUser = async function (req,res) {
   let checkPassword = req.body.password
   
 
-  let user = await authorModel.findOne({ emailId: checkEmail, password: checkPassword });
+  let user = await authorModel.findOne({ email: checkEmail, password: checkPassword });
  
   if(!user) {
     res.status(404).send({error : "check your email or password"})
@@ -93,6 +89,5 @@ const loginUser = async function (req,res) {
 
 
 module.exports.loginUser = loginUser
-module.exports.createAuthor = createAuthor    
-             
+module.exports.createAuthor = createAuthor     
            

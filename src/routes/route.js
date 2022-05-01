@@ -18,4 +18,5 @@ router.put('/delete', middle.authentication, middle.deleteBlogbyParams,  blogCon
 
 router.post('/login', authorController.loginUser )
 
-module.exports = router
+module.exports = router    
+   

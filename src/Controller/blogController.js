@@ -54,12 +54,10 @@ const createBlog = async function (req, res) {
 
 const getBlogs = async (req, res) => {
   try {
-
+    let Data = req.query
     let { authorId, tags, category, subcategory } = req.query
     console.log(req.query);
-    if (!req.query) {
-      res.status(401).send({ error: "no query is present" })
-    }
+   
 
     let blog = await blogModel.find({
       isPublished: true, isDeleted: false, $or: [{ authorId: authorId },

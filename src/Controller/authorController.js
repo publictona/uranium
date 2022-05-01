@@ -20,10 +20,10 @@ const createAuthor = async (req, res) => {
       res.status(401).send({error: "lname is missing"})
     }
 
-
     if(!title) {
       res.status(401).send({error: "title is not present"})
     }
+
     if(!email) {
       res.status(401).send({error: "Email is not present"})
     }
@@ -40,20 +40,22 @@ const createAuthor = async (req, res) => {
       res.status(401).send({error : "password isn't validate, please make sure length is minimum 8, should have one uppercase and lowercase character and Number also and donot use space and have a special character"})
     }
 
-  // request me email ara h ki nahi check it out and send error agr email hi nahi h 
-
     console.log(email)
     let isValidEmail = await validator.validate(email)
+
     if (!isValidEmail){
       res.status(401).send({error: "email is not valid"})
     }
+
     let isUniqueEmail = await authorModel.find({email:email })
     console.log(isUniqueEmail)
+    
     if (isUniqueEmail[0]) {
       res.status(401).send({error : "email already exists/ Not unique"})
     }
 
     let savedData = await authorModel.create(data)
+    
     if (!savedData) {
       res.status(401).send({ msg: 'auther not created' })
     }
@@ -64,11 +66,17 @@ const createAuthor = async (req, res) => {
   }
 }
 
-
 const loginUser = async function (req,res) {
   let checkEmail = req.body.email
   let checkPassword = req.body.password
   
+  if (!checkEmail) {
+    res.status(404).send({error : "email is missing"})
+  }
+
+  if (!checkPassword) {
+    res.status(404).send({error : "password is missing"})
+  }
 
   let user = await authorModel.findOne({ email: checkEmail, password: checkPassword });
  
@@ -82,11 +90,10 @@ const loginUser = async function (req,res) {
         batch: "uranium",
         organisation: "FUnctionUp",
       },"functionup-uranium");
-    // console.log(token)
-    res.setHeader("x-auth-token", token);
+    
+    res.setHeader("x-api-key", token);
     res.send({ status: true, data: token });
   };
-
 
 module.exports.loginUser = loginUser
 module.exports.createAuthor = createAuthor    

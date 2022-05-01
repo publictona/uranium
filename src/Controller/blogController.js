@@ -1,6 +1,6 @@
 const blogModel = require('../models/blogModel')
 const authorModel = require('../models/authorModel')
-const jwt   =require("jsonwebtoken")
+const jwt   = require("jsonwebtoken")
 
 
 const createBlog = async function (req, res) {
@@ -47,23 +47,19 @@ const createBlog = async function (req, res) {
   }
 }
 
-
 const getBlogs = async (req, res) => {
   try {
-    let Data = req.query
-    let { authorId, tags, category, subcategory } = req.query
-    console.log(req.query);
+    let data = req.query
+    
+    console.log(data);
    
 
-    let blog = await blogModel.find({
-      isPublished: true, isDeleted: false, $or: [{ authorId: authorId },
-      { tags: tags },
-      { category: category },
-      { subcategory: subcategory }]
+    let blog = await blogModel.find({ 
+      $and: [{isPublished: true}, {isDeleted: false}, data ]
     })
-    console.log(blog);
-    if (!blog) {
-      res.status(404).send({ err: 'data not found' })
+    
+    if (!blog[0]) {
+      res.status(404).send({ err: 'data not found/ all deleted' })
     }
     res.status(200).send({ msg: blog })
   } catch (err) {
@@ -71,7 +67,6 @@ const getBlogs = async (req, res) => {
     res.status(500).send({ err: 'server not found' })
   }
 }
-
 
 const updateBlog = async (req, res) => {
   try {
@@ -85,12 +80,12 @@ const updateBlog = async (req, res) => {
     if (tags) {
       updatedTags.push(tags)
     }
-    // updatedTags.push(tags)
+    
     let updatedSubCategory = user.subcategory
     if (subcategory) {
       updatedSubCategory.push(subcategory)
     }
-    // updatedSubCategory.push(subcategory)
+    
     console.log(data)
 
     let updatedBlog = await blogModel.findOneAndUpdate(
@@ -115,9 +110,6 @@ const updateBlog = async (req, res) => {
   }
 }
 
-
-
-
 const deleteBlog = async (req, res) => {
   try {
     let Id = req.params.blogsId
@@ -141,13 +133,9 @@ const deleteBlog = async (req, res) => {
 }
 
 
-
 const deleteByParams = async (req, res) => {
   try {
-    let decodedToken = jwt.verify(req.headers["x-api=key" || "X-Api-Key"],"functionup-uranium")
-
     let { authorsId, isPublished, tags, category, subcategory } = req.query
-
 
     if (!req.query) {
       return res
@@ -156,7 +144,7 @@ const deleteByParams = async (req, res) => {
     }
 
     let deletedDoc = await blogModel.updateMany({
-      isDeleted: false, authorId: decodedToken.userId,$or: [
+      isDeleted: false,  $or: [{ authorId: authorsId },
       { isPublished: isPublished },
       { tags: tags },
       { category: category },

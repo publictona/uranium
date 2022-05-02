@@ -47,6 +47,8 @@ const createBlog = async function (req, res) {
   }
 }
 
+
+
 const getBlogs = async (req, res) => {
   try {
     let data = req.query

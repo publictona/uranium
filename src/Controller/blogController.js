@@ -146,12 +146,13 @@ const deleteByParams = async (req, res) => {
     }
 
     let deletedDoc = await blogModel.updateMany({
-      isDeleted: false,  $or: [{ authorId: authorsId },
+      isDeleted: false,  $or: [
+      { authorId: authorsId },
       { isPublished: isPublished },
       { tags: tags },
       { category: category },
-      { subcategory: subcategory }],
-    },
+      { subcategory: subcategory }
+    ],},
       { isDeleted: true, deletedAt: Date()}, { returnDocument: 'after' })
     console.log(deletedDoc)
     if (!deletedDoc) {

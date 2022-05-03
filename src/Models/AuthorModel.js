@@ -9,6 +9,7 @@ const authorSchema = mongoose.Schema(
     lname: {
       type: String,
       required: true,
+      trim:true,
     },
     title: {
       type: String,

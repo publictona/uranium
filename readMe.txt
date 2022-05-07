@@ -1,52 +1,129 @@
-done - login api and take request from body and do the verification of the data and send response with jwt token 
-check request should have jwt token in header if its not present will send error in the response
-and then check the verification of the jwt token and if verification fails send respective error with status codes 
+# Uranium
+
+## Open to Intern Project Requirement
+
+### Key points
+- Create a group database `groupXDatabase`. You can clean the db you previously used and resue that.
+- This time each group should have a *single git branch*. Coordinate amongst yourselves by ensuring every next person pulls the code last pushed by a team mate. You branch will be checked as part of the demo. Branch name should follow the naming convention `project/internshipGroupX`
+- Follow the naming conventions exactly as instructed. The backend code will be integrated with the front-end application which means any mismatch in the expected request body will lead to failure in successful integration.
+
+### Models
+- College Model
+```
+{ name: { mandatory, unique, example iith}, fullName: {mandatory, example `Indian Institute of Technology, Hyderabad`}, logoLink: {mandatory}, isDeleted: {boolean, default: false} }
+```
+- Intern Model
+```
+{ name: {mandatory}, email: {mandatory, valid email, unique}, mobile: {mandatory, valid mobile number, unique}, collegeId: {ObjectId, ref to college model, isDeleted: {boolean, default: false}}
+```
+
+### POST /functionup/colleges
+- Create a college - a document for each member of the group
+- The logo link will be provided to you by the mentors. This link is a s3 (Amazon's Simple Service) url. Try accessing the link to see if the link is public or not.
+
+  `Endpoint: BASE_URL/functionup/colleges`
+
+### POST /functionup/interns
+- Create a document for an intern. 
+- Also save the collegeId along with the document. Your request body contains the following fields - { name, mobile, email, collegeName}
+- Return HTTP status 201 on a succesful document creation. Also return the document. The response should be a JSON object like [this](#successful-response-structure) 
+
+- Return HTTP status 400 for an invalid request with a response body like [this](#error-response-structure)
+
+### GET /functionup/collegeDetails
+- Returns the college details for the requested college (Expect a query parameter by the name `collegeName`. This is anabbreviated college name. For example `iith`)
+- Returns the list of all interns who have applied for internship at this college.
+- The response structure should look like [this](#college-details)
 
 
+## Testing 
+- To test these apis create a new collection in Postman named Project 2 Internship
+- Each api should have a new request in this collection
+- Each request in the collection should be rightly named. Eg Create college, Get college details etc
+- Each member of each team should have their tests in running state
 
 
-check the responses and http status of all api as per the format shared in the project like Successful Response structure and Error Response structure
-check all apis and their validations 
-change the naming convention of all code to camelCase
-doubt of fname validation and be more specific about what to exactly validate in all api's
-clear the code in proper format and make it clean 
-remove all unnecessary comments ask whether to keep the explaining ones or not 
-tags wali problem resolve karni hai in delete api 
-check if deleted date and published date getting properly printed or not
-give right names to variable 
-validations ki bhi alag se file bnaani h 
+Refer below sample
 
-// request me email ara h ki nahi check it out and send error agr email hi nahi h - check krna h author model me 
-// get blog wala sare ispublished: true and isDeleted : false waale normaly nahi bhej raha 
-// blog update api me isPublished ko true false nahi hora 
-// blog update api me blogs Id nahi hone par error handle karna h 
-// delete blogs me blogId present nahi hone par error handle karna h and 
-and check this "If the blog document doesn't exist then return an HTTP status of 404 with a body like this"
-and yehi wala isdeleted: true walo ko bhi return krra h jbki it should return ki its already deleted 
+ ![A Postman collection and request sample](assets/Postman-collection-sample.png)
 
-getblogs me combination of query kese lena hai 
+## Response
 
+### Successful Response structure
+```yaml
+{
+  status: true,
+  data: {
 
-
-const deleteBlogs = async (req, res) => {
-    try {
-        let keyArr = Object.keys(req.query)
-        let somethingBad = false;
-        for (let i = 0; i < keyArr.length; i++) {
-            if (!(keyArr[i] == "authorId" || keyArr[i] == "category" || keyArr[i] == "tags" || keyArr[i] == "subcategory" || keyArr[i] == "isPublished"))
-                somethingBad = true;
-        }
-        if (somethingBad) {
-            return res.status(400).send({ status: false, msg: "invalid input" })
-        }
-        req.query.isDeleted = false;
-        let date = new Date()
-        const data = await blogsModel.updateMany(req.query, { $set: { isDeleted: true, deletedAt: date } })
-        if (data.matchedCount == 0)
-            return res.status(404).send({ status: false, msg: "blog not found" })
-        res.status(200).send({ status: true, data: "finally deleted Successfull " + data.matchedCount + " documents" })
-    }
-    catch (err) {
-        res.send({ msg: err.message })
-    }
+  }
 }
+```
+### Error Response structure
+```yaml
+{
+  status: false,
+  message: ""
+}
+```
+
+## Collections samples
+
+#### College
+```yaml
+{
+    "name" : "iith",
+    "fullName" : "Indian Institute of Technology, Hyderabad",
+    "logoLink" : "https://functionup.s3.ap-south-1.amazonaws.com/colleges/iith.png",
+    "isDeleted" : false
+}
+```
+
+
+#### Intern
+```yaml
+   {
+    "isDeleted" : false,
+    "name" : "Jane Does",
+    "email" : "jane.doe@iith.in",
+    "mobile" : "90000900000",
+    "collegeId" : ObjectId("888771129c9ea621dc7f5e3b")
+}
+```
+## Response samples
+
+### College details
+```yaml
+{
+  "data": {
+    "name": "xyz",
+    "fullName": "Some Institute of Engineering and Technology",
+    "logoLink": "some public s3 link for a college logo",
+    "interests": [
+      {
+        "_id": "123a47301a53ecaeea02be59",
+        "name": "Jane Doe",
+        "email": "jane.doe@miet.ac.in",
+        "mobile": "8888888888"
+      },
+      {
+        "_id": "45692c0e1a53ecaeea02b1ac",
+        "name": "John Doe",
+        "email": "john.doe@miet.ac.in",
+        "mobile": "9999999999"
+      },
+      {
+        "_id": "7898d0251a53ecaeea02a623",
+        "name": "Sukruti",
+        "email": "dummy.email@miet.ac.in",
+        "mobile": "9191919191"
+      },
+      {
+        "_id": "999803da1a53ecaeea02a07e",
+        "name": "Neeraj Kumar",
+        "email": "another.example@miet.ac.in",
+        "mobile": "9898989898"
+      }
+    ]
+  }
+}
+```

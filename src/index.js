@@ -1,24 +1,35 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const route = require('./routes/route.js')
-const { default: mongoose } = require('mongoose')
-const app = express()
+const express = require('express');
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+var bodyParser = require('body-parser');
 
-mongoose
-  .connect(
-    'mongodb+srv://Kaustubh-db:Bs9axX3hjg0bR120@cluster0.su9ki.mongodb.net/Project-Blog',
-    {
-      useNewUrlParser: true,
-    },
-  )
-  .then(() => console.log('MongoDb is connected'))
-  .catch((err) => console.log(err))
+const route = require('./routes/route.js');
 
-app.use('/', route)
+const app = express();
 
-app.listen(process.env.PORT || 3000, function () {
-  console.log('Express app running on port ' + (process.env.PORT || 3000))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+const today = new Date().toLocaleString()
+app.use((req,res,next) => {
+    console.log(today +' , '+ req.path +' , '+ req.socket.remoteAddress )
+    next();
 })
+
+const mongoose = require('mongoose')
+mongoose.connect("mongodb+srv://Sushma123:oPRb0pySPR0iiGiz@cluster0.wp92b.mongodb.net/mongoosedb?authSource=admin&replicaSet=atlas-4x5pr3-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true",
+ {useNewUrlParser: true})
+    .then(() => console.log('Hey Sushma !!! Go Ahead Mongo is connected'))
+    .catch(err => console.log(err))
+
+app.use('/', route);
+
+app.listen(process.env.PORT || 3000, function() {
+	console.log('Express app running on port ' + (process.env.PORT || 3000))
+});
+
+
+
+
+
+
+
